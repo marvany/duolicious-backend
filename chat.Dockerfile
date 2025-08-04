@@ -6,16 +6,14 @@ ENV PYTHONUNBUFFERED=true
 
 WORKDIR /app
 
-COPY \
-  --exclude=antiabuse/antiporn \
-  --exclude=test \
-  --exclude=vm \
-  . /app
+# Copy the whole repo into /app
+COPY --exclude=antiabuse/antiporn --exclude=test --exclude=vm . .
 
-RUN : \
-  && apt update \
-  && apt install -y ffmpeg \
-  && pip install --no-cache-dir -r /app/requirements.txt \
-  && python -m spacy download en_core_web_sm
+# Fix CR-LF, make scripts executable, install deps
+RUN apt-get update -y \
+ && apt-get install -y ffmpeg dos2unix \
+ && dos2unix /app/*.sh \
+ && chmod +x /app/*.sh \
+ && pip install --no-cache-dir -r requirements.txt
 
-CMD /app/chat.main.sh
+CMD ["bash", "/app/chat.main.sh"]

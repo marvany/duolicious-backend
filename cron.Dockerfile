@@ -6,11 +6,14 @@ ENV PYTHONUNBUFFERED=true
 
 WORKDIR /app
 
-COPY \
-  --exclude=test \
-  --exclude=vm \
-  . /app
+# Copy the whole project into /app
+COPY --exclude=test --exclude=vm . .
 
-RUN pip install --no-cache-dir -r /app/requirements.txt
+# ▸ install helpers ▸ convert CR-LF to LF ▸ make scripts executable ▸ install Python deps
+RUN apt-get update -y \
+ && apt-get install -y ffmpeg dos2unix \
+ && dos2unix /app/*.sh \
+ && chmod +x /app/*.sh \
+ && pip install --no-cache-dir -r requirements.txt
 
-CMD /app/cron.main.sh
+CMD ["bash", "/app/cron.main.sh"]
